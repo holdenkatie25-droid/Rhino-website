@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RHINO | Never Backs Down</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#09090d;color:#fff;font-family:Arial,sans-serif}
+header{padding:22px 8%;display:flex;justify-content:space-between;align-items:center;background:#111}
+.logo{font-size:30px;font-weight:900;color:#ff263d}nav a{color:#fff;text-decoration:none;margin-left:18px;font-weight:bold}
+.hero{text-align:center;padding:85px 20px;background:radial-gradient(circle,#48101b,#09090d 70%)}
+.hero h1{font-size:clamp(55px,12vw,100px);margin:0;color:#ff263d}.hero h2{font-size:clamp(18px,4vw,28px);letter-spacing:5px}
+.hero p{color:#ccc}.btn{display:inline-block;padding:14px 24px;margin:10px;border-radius:8px;background:#e9233a;color:white;text-decoration:none;font-weight:bold}
+.btn.twitch{background:#9147ff}section{padding:55px 8%;text-align:center}h2.section-title{font-size:30px;color:#ff344b}
+.panel{background:#17171e;padding:30px;border-radius:15px;margin:15px auto;max-width:750px}
+.status{font-weight:bold;font-size:22px;color:#aaa}.status.live{color:#ff344b}.status.soon{color:#ffad33}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:18px}
+.card{background:#17171e;border:1px solid #34343d;border-radius:12px;padding:25px}.card h3{color:#ff344b}
+footer{text-align:center;background:#111;padding:30px;color:#aaa}
+@media(max-width:600px){header{flex-direction:column;gap:16px}nav a{margin:0 8px}.hero{padding:65px 15px}}
+</style>
+</head>
+<body>
+<header><div class="logo">🐺 RHINO</div><nav><a href="#streams">Streams</a><a href="#videos">Videos</a><a href="#socials">Follow</a></nav></header>
+<div class="hero"><h1>RHINO</h1><h2>NEVER BACKS DOWN.</h2><p>Gaming. Reactions. Entertainment. Welcome to the Rhino community!</p>
+<a class="btn" href="https://www.youtube.com/@Rhino109h" target="_blank" rel="noopener">YOUTUBE</a>
+<a class="btn twitch" href="https://www.twitch.tv/rhino109h" target="_blank" rel="noopener">TWITCH</a></div>
+<section id="streams"><h2 class="section-title">STREAM STATUS</h2><div class="panel">
+<div class="status" id="status">CHECKING TWITCH…</div><h2 id="stream-title">Checking Rhino's channel</h2><p id="stream-message">Connecting to Twitch status…</p>
+<a class="btn twitch" href="https://www.twitch.tv/rhino109h" target="_blank" rel="noopener">WATCH ON TWITCH</a>
+</div>
+<div class="panel">
+<div class="status" id="youtube-status">CHECKING YOUTUBE…</div>
+<h2 id="youtube-title">Checking Rhino's YouTube channel</h2>
+<p id="youtube-message">Connecting to YouTube status…</p>
+<a class="btn" href="https://www.youtube.com/@Rhino109h" target="_blank" rel="noopener">OPEN YOUTUBE</a>
+</div>
+</section>
+<section id="videos"><h2 class="section-title">GAMING HIGHLIGHTS</h2><div class="cards">
+<div class="card"><h3>🎮 Epic Gameplay</h3><p>Rhino's best gaming moments.</p></div>
+<div class="card"><h3>🔥 Crazy Reactions</h3><p>Funny and unforgettable moments.</p></div>
+<div class="card"><h3>🏆 Best Moments</h3><p>Check out the latest Rhino highlights.</p></div></div><p>New videos coming soon!</p></section>
+<section id="socials"><h2 class="section-title">JOIN THE RHINO COMMUNITY</h2><div class="panel"><h3>Subscribe and follow!</h3>
+<a class="btn" href="https://www.youtube.com/@Rhino109h" target="_blank" rel="noopener">SUBSCRIBE ON YOUTUBE</a>
+<a class="btn twitch" href="https://www.twitch.tv/rhino109h" target="_blank" rel="noopener">FOLLOW ON TWITCH</a></div></section>
+<footer>🐺 RHINO — NEVER BACKS DOWN.<br>Thanks for supporting the community!</footer>
+<script>
+async function updateTwitchStatus(){
+ const status=document.getElementById("status"), title=document.getElementById("stream-title"), msg=document.getElementById("stream-message");
+ try{
+  const response=await fetch("/.netlify/functions/twitch-status",{cache:"no-store"});
+  if(!response.ok) throw new Error("Status service unavailable");
+  const data=await response.json();
+  status.className="status "+(data.isLive?"live":"");
+  if(data.isLive){
+   status.textContent="🔴 LIVE NOW";
+   title.textContent=data.title || "RHINO IS LIVE!";
+   msg.textContent=(data.gameName? "Playing "+data.gameName+" · ":"")+(Number.isInteger(data.viewerCount)?data.viewerCount+" watching · ":"")+"Come watch the stream!";
+  }else{
+   status.textContent="⚫ OFFLINE – BACK SOON";
+   title.textContent="THE RHINO IS RESTING";
+   msg.textContent="Rhino isn't live right now. Follow on Twitch so you don't miss the next stream.";
+  }
+ }catch(e){
+  status.className="status";status.textContent="STATUS UNAVAILABLE";
+  title.textContent="CHECK RHINO ON TWITCH";
+  msg.textContent="The automatic status checker needs its Twitch app keys configured in Netlify.";
+ }
+}
+updateTwitchStatus();
+setInterval(updateTwitchStatus,60000);
+
+async function updateYouTubeStatus(){
+ const status=document.getElementById("youtube-status"), title=document.getElementById("youtube-title"), msg=document.getElementById("youtube-message");
+ try{
+  const response=await fetch("/.netlify/functions/youtube-status",{cache:"no-store"});
+  if(!response.ok) throw new Error("YouTube status service unavailable");
+  const data=await response.json();
+  status.className="status "+(data.isLive?"live":"");
+  if(data.isLive){
+   status.textContent="🔴 LIVE ON YOUTUBE";
+   title.textContent=data.title || "RHINO IS LIVE ON YOUTUBE!";
+   msg.textContent=(data.viewerCount!=null?data.viewerCount+" watching · ":"")+"Watch Rhino's live stream now!";
+  }else{
+   status.textContent="⚫ YOUTUBE OFFLINE";
+   title.textContent="NO LIVE YOUTUBE STREAM";
+   msg.textContent="Rhino isn't live on YouTube right now. Check back later!";
+  }
+ }catch(e){
+  status.className="status";status.textContent="YOUTUBE STATUS UNAVAILABLE";
+  title.textContent="CHECK RHINO ON YOUTUBE";
+  msg.textContent="The YouTube checker needs a Google/YouTube API key configured in Netlify.";
+ }
+}
+updateYouTubeStatus();
+// YouTube search.list has a separate default limit of 100 calls per day; check every 30 minutes.
+setInterval(updateYouTubeStatus,30*60*1000);
+</script>
+</body></html>
